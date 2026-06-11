@@ -1,0 +1,29 @@
+name: Auto Clean Photos
+
+on:
+  schedule:
+    # 매주 일요일 새벽 4시(한국 시간 기준)마다 자동으로 실행되는 스케줄러
+    - cron: '0 19 * * 0'
+  workflow_dispatch: # 필요할 때 바이어님이 수동으로 바로 실행할 수도 있게 만드는 버튼
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 코드 가져오기
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+
+      - name: 사진 파일만 싹 골라서 삭제하기
+        run: |
+          # 폴더 내의 모든 png 파일을 찾아서 삭제 (index.html 등 소스코드는 절대 안 건드림)
+          rm -f *.png
+          
+      - name: 지운 상태를 깃허브에 최종 자동 저장하기
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add -A
+          # 지울 사진이 있을 때만 저장소에 반영
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔥 주간 사진 자동 청소 완료" && git push)
