@@ -1,0 +1,26 @@
+name: Auto Clean Photos
+
+on:
+  schedule:
+    - cron: '0 19 * * 0'
+  workflow_dispatch: # 수동 스위치 활성화 버튼!
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 저장소 코드 가져오기
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true
+
+      - name: 사진 파일만 싹 골라서 삭제하기
+        run: |
+          rm -f *.png
+          
+      - name: 지운 상태를 깃허브에 최종 자동 저장하기
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔥 주간 사진 자동 청소 완료" && git push)
